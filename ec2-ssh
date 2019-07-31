@@ -7,22 +7,22 @@ REGION=ap-south-1
 while getopts "hrku:" OPTION
 do
 	case $OPTION in
-		r)
-			REGION=$OPTARG
-			;;
-        k)
-            KEY_PATH=$OPTARG
-            ;;
-        u)
-            USERNAME=$OPTARG
-            ;;
-		h)
-			echo "EC2-SSH"
-            echo -e "  -r,   Set Region.         Default: $REGION"
-            echo -e "  -k,   Set Key Path.       Default: $KEY_PATH"
-            echo -e "  -u,   Set SSH Username.   Default: $USERNAME"
-			exit
-			;;
+	r)
+    		REGION=$OPTARG
+    		;;
+	k)
+    		KEY_PATH=$OPTARG
+    		;;
+	u)
+    		USERNAME=$OPTARG
+    		;;
+	h)
+    		echo "EC2-SSH"
+    		echo -e "  -r,   Set Region.         Default: $REGION"
+   		echo -e "  -k,   Set Key Path.       Default: $KEY_PATH"
+    		echo -e "  -u,   Set SSH Username.   Default: $USERNAME"
+    		exit
+    		;;
 	esac
 done
 
