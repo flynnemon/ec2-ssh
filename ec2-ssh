@@ -1,0 +1,44 @@
+#! /bin/bash
+
+KEY_PATH=~/Documents/keys
+USERNAME=ubuntu
+REGION=ap-south-1
+
+while getopts "hrku:" OPTION
+do
+	case $OPTION in
+		r)
+			REGION=$OPTARG
+			;;
+        k)
+            KEY_PATH=$OPTARG
+            ;;
+        u)
+            USERNAME=$OPTARG
+            ;;
+		h)
+			echo "EC2-SSH"
+            echo -e "  -r,   Set Region.         Default: $REGION"
+            echo -e "  -k,   Set Key Path.       Default: $KEY_PATH"
+            echo -e "  -u,   Set SSH Username.   Default: $USERNAME"
+			exit
+			;;
+	esac
+done
+
+echo -e Welcome to EC2-SSH
+
+aws ec2 describe-instances --region $REGION | jq -r '[.Reservations | .[] | .Instances | .[] | { PublicIpAddress: .PublicIpAddress, PrivateIpAddress: .PrivateIpAddress, PublicDnsName: .PublicDnsName, VpcId: .VpcId, Name: .Tags | from_entries | .Name, SubnetId: .SubnetId, KeyName: .KeyName, InstanceId: .InstanceId, State: .State.Name , Id: .Id} ]  | to_entries | map(.value.Id = (1+.key) ) | map(.value) | map(.Id, .Name, .PublicIpAddress, .PrivateIpAddress, .VpcId, .State, .KeyName, "\n" ) | @csv' | sed 's/"//g' | sed 's/,*$//g' | sed 's/^,\(.*\)/\1/' | awk -F "\"*,\"*" '{ printf ("%s %s %s %s %s %s %s\n", $1, $2, $3, $4, $5, $6, $7) }' | column -t
+
+printf "Select the ID of the machine to access, followed by [ENTER]: "
+read SELECTION
+
+SELECTION=$SELECTION-1
+INSTANCE=$( aws ec2 describe-instances --region ap-south-1 | jq -r '[.Reservations | .[] | .Instances | .[] | { PublicIpAddress: .PublicIpAddress, PrivateIpAddress: .PrivateIpAddress, PublicDnsName: .PublicDnsName, VpcId: .VpcId, Name: .Tags | from_entries | .Name, SubnetId: .SubnetId, KeyName: .KeyName, InstanceId: .InstanceId, State: .State.Name } ] | .['$SELECTION']')
+NAME=$( echo $INSTANCE | jq -r .Name )
+PUBLIC_IP=$( echo $INSTANCE | jq -r .PublicIpAddress )
+PRIVATE_IP=$( echo $INSTANCE | jq -r .PrivateIpAddress )
+KEY=$( echo $INSTANCE | jq -r .KeyName )
+
+echo -e Connecting to $NAME using $KEY via $PUBLIC_IP
+ssh -i $KEY_PATH/$KEY.pem $USERNAME@$PUBLIC_IP
