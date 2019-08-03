@@ -1,6 +1,6 @@
 #! /bin/bash
 
-KEY_PATH=~/Documents/keys
+KEY_PATH=~/Documents/tala
 USERNAME=ubuntu
 REGION=ap-south-1
 
@@ -34,7 +34,7 @@ printf "Select the ID of the machine to access, followed by [ENTER]: "
 read SELECTION
 
 SELECTION=$SELECTION-1
-INSTANCE=$( aws ec2 describe-instances --region ap-south-1 | jq -r '[.Reservations | .[] | .Instances | .[] | { PublicIpAddress: .PublicIpAddress, PrivateIpAddress: .PrivateIpAddress, PublicDnsName: .PublicDnsName, VpcId: .VpcId, Name: .Tags | from_entries | .Name, SubnetId: .SubnetId, KeyName: .KeyName, InstanceId: .InstanceId, State: .State.Name } ] | .['$SELECTION']')
+INSTANCE=$( aws ec2 describe-instances --region $REGION | jq -r '[.Reservations | .[] | .Instances | .[] | { PublicIpAddress: .PublicIpAddress, PrivateIpAddress: .PrivateIpAddress, PublicDnsName: .PublicDnsName, VpcId: .VpcId, Name: .Tags | from_entries | .Name, SubnetId: .SubnetId, KeyName: .KeyName, InstanceId: .InstanceId, State: .State.Name } ] | .['$SELECTION']')
 NAME=$( echo $INSTANCE | jq -r .Name )
 PUBLIC_IP=$( echo $INSTANCE | jq -r .PublicIpAddress )
 PRIVATE_IP=$( echo $INSTANCE | jq -r .PrivateIpAddress )
